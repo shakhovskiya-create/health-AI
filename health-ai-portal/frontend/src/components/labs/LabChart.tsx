@@ -36,7 +36,7 @@ const COLORS = [
 export function LabChart({
   trends,
   selectedMarkers,
-  referenceRanges,
+  referenceRanges: _referenceRanges,
   height = 300,
 }: LabChartProps) {
   const markersToShow = selectedMarkers || trends.map((t) => t.marker_name)
