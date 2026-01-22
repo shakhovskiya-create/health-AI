@@ -2,7 +2,7 @@
 builder = "nixpacks"
 
 [build.nixpacksPlan.phases.setup]
-nixPkgs = ["go", "nodejs"]
+nixPkgs = ["go_1_21", "nodejs"]
 
 [build.nixpacksPlan.phases.install]
 cmds = ["cd frontend && npm install"]
