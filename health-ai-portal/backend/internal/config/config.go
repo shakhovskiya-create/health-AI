@@ -5,6 +5,7 @@ import (
 )
 
 type Config struct {
+	DatabaseURL   string
 	DBHost        string
 	DBPort        string
 	DBUser        string
@@ -16,7 +17,8 @@ type Config struct {
 }
 
 func Load() *Config {
-	return &Config{
+	cfg := &Config{
+		DatabaseURL:  getEnv("DATABASE_URL", ""),
 		DBHost:       getEnv("DB_HOST", "localhost"),
 		DBPort:       getEnv("DB_PORT", "5432"),
 		DBUser:       getEnv("DB_USER", "healthai"),
@@ -26,10 +28,20 @@ func Load() *Config {
 		JWTSecret:    getEnv("JWT_SECRET", "your-secret-key-change-in-production"),
 		ClaudeAPIKey: getEnv("CLAUDE_API_KEY", ""),
 	}
+	return cfg
 }
 
-func (c *Config) DatabaseURL() string {
-	return "postgres://" + c.DBUser + ":" + c.DBPassword + "@" + c.DBHost + ":" + c.DBPort + "/" + c.DBName + "?sslmode=disable"
+func (c *Config) GetDatabaseURL() string {
+	// If DATABASE_URL is set directly, use it
+	if c.DatabaseURL != "" {
+		return c.DatabaseURL
+	}
+	// Otherwise build from components with SSL required for production
+	sslmode := "disable"
+	if c.DBHost != "localhost" && c.DBHost != "postgres" {
+		sslmode = "require"
+	}
+	return "postgres://" + c.DBUser + ":" + c.DBPassword + "@" + c.DBHost + ":" + c.DBPort + "/" + c.DBName + "?sslmode=" + sslmode
 }
 
 func getEnv(key, fallback string) string {

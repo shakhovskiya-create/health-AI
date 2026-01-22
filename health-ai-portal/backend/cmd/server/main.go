@@ -25,20 +25,26 @@ func main() {
 	cfg := config.Load()
 
 	// Connect to database
-	db, err := database.New(cfg.DatabaseURL())
+	dbURL := cfg.GetDatabaseURL()
+	log.Printf("Connecting to database...")
+	db, err := database.New(dbURL)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 	defer db.Close()
+	log.Printf("Database connected successfully")
 
-	// Run migrations
-	migrationsPath := filepath.Join("internal", "database", "migrations")
-	if _, err := os.Stat(migrationsPath); os.IsNotExist(err) {
-		// Try alternative path for Docker
-		migrationsPath = "/app/internal/database/migrations"
-	}
-	if err := db.RunMigrations(migrationsPath); err != nil {
-		log.Printf("Warning: Failed to run migrations: %v", err)
+	// Run migrations only for local development (skip if using external DB like Supabase)
+	if cfg.DatabaseURL == "" && (cfg.DBHost == "localhost" || cfg.DBHost == "postgres") {
+		migrationsPath := filepath.Join("internal", "database", "migrations")
+		if _, err := os.Stat(migrationsPath); os.IsNotExist(err) {
+			migrationsPath = "/app/internal/database/migrations"
+		}
+		if err := db.RunMigrations(migrationsPath); err != nil {
+			log.Printf("Warning: Failed to run migrations: %v", err)
+		}
+	} else {
+		log.Printf("Skipping migrations (external database)")
 	}
 
 	// Initialize Claude AI client
