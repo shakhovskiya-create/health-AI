@@ -9,10 +9,11 @@
 
 ```
 Phase 1: MVP Core ✅ ──────────────────────────► DONE (2026-01-22)
-Phase 2: Forms & Charts ◯ ────────────────────► IN PROGRESS
+Phase 2: Forms & Charts ◐ ───────────────────► IN PROGRESS
 Phase 3: AI Integration ◯ ────────────────────► PLANNED
 Phase 4: Notifications & Import ◯ ────────────► PLANNED
 Phase 5: Polish & Mobile ◯ ───────────────────► PLANNED
+Phase 6: Deployment (Replit + Supabase) ◯ ───► PLANNED
 ```
 
 ---
@@ -39,36 +40,35 @@ Phase 5: Polish & Mobile ◯ ─────────────────
 
 ---
 
-## PHASE 2: FORMS & CHARTS
+## PHASE 2: FORMS & CHARTS ✅
 
-**Статус:** НЕ НАЧАТО
-**Приоритет:** HIGH
-**Оценка:** 3-5 дней
+**Статус:** ЗАВЕРШЕНО
+**Дата:** 2026-01-22
 
 ### Sprint 2.1 — Forms
 | Задача | Приоритет | Оценка | Статус |
 |--------|-----------|--------|--------|
-| Modal component | High | 2h | ◯ |
-| SupplementForm | High | 3h | ◯ |
-| GoalForm | High | 2h | ◯ |
-| LabResultForm | High | 3h | ◯ |
-| Delete confirmation | Medium | 1h | ◯ |
-| Form validation (react-hook-form) | Medium | 2h | ◯ |
+| Modal component | High | 2h | ● |
+| SupplementForm | High | 3h | ● |
+| GoalForm | High | 2h | ● |
+| LabResultForm | High | 3h | ● |
+| Delete confirmation | Medium | 1h | ● |
+| Form validation (react-hook-form) | Medium | 2h | ● |
 
 ### Sprint 2.2 — Charts
 | Задача | Приоритет | Оценка | Статус |
 |--------|-----------|--------|--------|
-| Recharts setup | High | 1h | ◯ |
-| LabChart component | High | 3h | ◯ |
-| Trends page improvements | Medium | 2h | ◯ |
-| Goal progress visualization | Medium | 2h | ◯ |
+| Recharts setup | High | 1h | ● |
+| LabChart component | High | 3h | ● |
+| Trends page improvements | Medium | 2h | ● |
+| Goal progress visualization | Medium | 2h | ● |
 
 ### Sprint 2.3 — Interactions
 | Задача | Приоритет | Оценка | Статус |
 |--------|-----------|--------|--------|
-| InteractionsTable component | Medium | 3h | ◯ |
-| Interaction filters | Low | 1h | ◯ |
-| Interaction form | Low | 2h | ◯ |
+| InteractionsTable component | Medium | 3h | ● |
+| Interaction filters | Low | 1h | ● |
+| Interaction form | Low | 2h | ● |
 
 ---
 
@@ -147,6 +147,39 @@ Phase 5: Polish & Mobile ◯ ─────────────────
 
 ---
 
+## PHASE 6: DEPLOYMENT (REPLIT + SUPABASE)
+
+**Статус:** НЕ НАЧАТО
+**Приоритет:** HIGH
+**Оценка:** 1-2 дня
+
+### Sprint 6.1 — Supabase Setup
+| Задача | Приоритет | Оценка | Статус |
+|--------|-----------|--------|--------|
+| Миграция схемы в Supabase | High | 2h | ◯ |
+| Connection string config | High | 1h | ◯ |
+| Seed данные | Medium | 1h | ◯ |
+| Row Level Security (RLS) | Medium | 2h | ◯ |
+
+### Sprint 6.2 — Replit Setup
+| Задача | Приоритет | Оценка | Статус |
+|--------|-----------|--------|--------|
+| Replit project setup | High | 1h | ◯ |
+| Environment variables | High | 30m | ◯ |
+| Backend build & run | High | 1h | ◯ |
+| Frontend build & serve | High | 1h | ◯ |
+| Replit Deployments config | High | 1h | ◯ |
+
+### Sprint 6.3 — Production Config
+| Задача | Приоритет | Оценка | Статус |
+|--------|-----------|--------|--------|
+| CORS для production | High | 30m | ◯ |
+| API URL config | High | 30m | ◯ |
+| Health checks | Medium | 30m | ◯ |
+| Logging | Low | 1h | ◯ |
+
+---
+
 ## BACKLOG
 
 Идеи для будущих версий:
@@ -175,6 +208,23 @@ Phase 5: Polish & Mobile ◯ ─────────────────
 | Backend endpoints | 15 | 18 |
 | Frontend pages | 6 | 6 |
 | Время | 1 день | 1 день |
+
+### Sprint 2 (2026-01-22) — Forms & Charts
+**Цель:** Добавить формы для CRUD операций и графики
+**Результат:** ✅ Успешно
+
+| Метрика | План | Факт |
+|---------|------|------|
+| Form components | 4 | 4 |
+| Chart components | 2 | 3 |
+| Pages updated | 3 | 3 |
+
+**Созданные компоненты:**
+- Modal + ConfirmDialog
+- Input, Textarea, Select
+- SupplementForm, GoalForm, LabForm
+- LabChart, SingleMarkerChart, MarkerSelector
+- InteractionsTable, InteractionMatrix
 
 ---
 

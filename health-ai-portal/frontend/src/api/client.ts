@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Supplement, Goal, LabResult, LabTrend, Cycle, ScheduleItem } from '@/types'
+import type { Supplement, Goal, LabResult, LabTrend, Cycle, ScheduleItem, Interaction } from '@/types'
 
 const api = axios.create({
   baseURL: '/api',
@@ -72,6 +72,24 @@ export const labsApi = {
 
   getTrends: () =>
     api.get<LabTrend[]>('/labs/trends').then((r) => r.data),
+}
+
+// Interactions
+export const interactionsApi = {
+  list: (params?: { type?: string }) =>
+    api.get<Interaction[]>('/interactions', { params }).then((r) => r.data),
+
+  get: (id: number) =>
+    api.get<Interaction>(`/interactions/${id}`).then((r) => r.data),
+
+  create: (data: Partial<Interaction>) =>
+    api.post<Interaction>('/interactions', data).then((r) => r.data),
+
+  update: (id: number, data: Partial<Interaction>) =>
+    api.put<Interaction>(`/interactions/${id}`, data).then((r) => r.data),
+
+  delete: (id: number) =>
+    api.delete(`/interactions/${id}`),
 }
 
 // Cycles

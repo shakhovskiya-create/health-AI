@@ -8,6 +8,34 @@
 
 ## DONE (Выполнено)
 
+### 2026-01-22 — Phase 2: Forms & Charts
+
+#### Frontend Components
+- [x] Modal component с анимацией и backdrop
+- [x] ConfirmDialog для подтверждения удаления
+- [x] Input, Textarea, Select — форм-компоненты
+- [x] SupplementForm — создание/редактирование препаратов
+- [x] GoalForm — создание/редактирование целей
+- [x] LabForm — ввод результатов анализов с автокомплитом маркеров
+- [x] LabChart, SingleMarkerChart — графики трендов (Recharts)
+- [x] MarkerSelector — выбор маркеров для отображения
+- [x] InteractionsTable — таблица взаимодействий с фильтрами
+- [x] InteractionMatrix — матрица взаимодействий препаратов
+
+#### Pages Updated
+- [x] SupplementsPage — интеграция формы, edit/delete
+- [x] LabsPage — интеграция формы, графики, edit/delete
+- [x] GoalsWidget — добавление/редактирование/удаление целей
+
+#### Features
+- [x] CRUD UI для всех основных сущностей
+- [x] Визуализация трендов лабораторных показателей
+- [x] Reference range на графиках (зелёная зона)
+- [x] Hover-эффекты для edit/delete кнопок
+- [x] Фильтрация взаимодействий по типу
+
+---
+
 ### 2026-01-22 — MVP Release
 
 #### Backend
@@ -61,21 +89,12 @@ _Нет активных задач_
 
 ### High Priority
 
-#### Forms & CRUD UI
-- [ ] SupplementForm — создание/редактирование препарата
-- [ ] GoalForm — создание/редактирование цели
-- [ ] LabResultForm — ввод результатов анализов
-- [ ] Modal компонент для форм
-- [ ] Confirmation dialog для удаления
+#### Goal Progress Visualization
+- [ ] Progress bars для целей
+- [ ] Процент достижения цели
 
-#### Charts
-- [ ] LabChart компонент (Recharts)
-- [ ] График трендов маркеров
-- [ ] Прогресс по целям (progress bars)
-
-#### Interactions
-- [ ] InteractionsTable — матрица взаимодействий
-- [ ] Фильтрация по типу (critical/warning/synergy)
+#### Interaction Form
+- [ ] Форма для добавления новых взаимодействий
 
 ### Medium Priority
 
@@ -145,8 +164,10 @@ _Нет активных задач_
 | Метрика | Значение | Дата |
 |---------|----------|------|
 | Файлов в backend | ~15 | 2026-01-22 |
-| Файлов в frontend | ~25 | 2026-01-22 |
+| Файлов в frontend | ~35 | 2026-01-22 |
 | Таблиц в БД | 12 | 2026-01-22 |
 | API endpoints | 18 | 2026-01-22 |
-| React компонентов | 15 | 2026-01-22 |
+| React компонентов | 25+ | 2026-01-22 |
+| Form компонентов | 6 | 2026-01-22 |
+| Chart компонентов | 3 | 2026-01-22 |
 | Seed препаратов | 45+ | 2026-01-22 |

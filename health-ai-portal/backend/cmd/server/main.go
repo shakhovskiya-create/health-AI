@@ -44,6 +44,7 @@ func main() {
 	supplementHandler := handlers.NewSupplementHandler(db)
 	goalHandler := handlers.NewGoalHandler(db)
 	labHandler := handlers.NewLabHandler(db)
+	interactionHandler := handlers.NewInteractionHandler(db)
 
 	// Setup router
 	r := chi.NewRouter()
@@ -91,6 +92,15 @@ func main() {
 			r.Get("/{id}", labHandler.Get)
 			r.Put("/{id}", labHandler.Update)
 			r.Delete("/{id}", labHandler.Delete)
+		})
+
+		// Interactions
+		r.Route("/interactions", func(r chi.Router) {
+			r.Get("/", interactionHandler.List)
+			r.Post("/", interactionHandler.Create)
+			r.Get("/{id}", interactionHandler.Get)
+			r.Put("/{id}", interactionHandler.Update)
+			r.Delete("/{id}", interactionHandler.Delete)
 		})
 
 		// Dashboard summary

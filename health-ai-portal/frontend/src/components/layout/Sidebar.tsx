@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard,
   Pill,
+  GitCompare,
   TestTube2,
   History,
   Dumbbell,
@@ -13,6 +14,7 @@ import { cn } from '@/lib/utils'
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Стек', href: '/supplements', icon: Pill },
+  { name: 'Взаимодействия', href: '/interactions', icon: GitCompare },
   { name: 'Анализы', href: '/labs', icon: TestTube2 },
   { name: 'Циклы', href: '/cycles', icon: History },
   { name: 'Тренировки', href: '/workouts', icon: Dumbbell },

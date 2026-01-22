@@ -1,13 +1,23 @@
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useState, useMemo } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { labsApi } from '@/api/client'
 import { Card } from '@/components/common/Card'
-import { Plus, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { LabForm } from '@/components/labs/LabForm'
+import { SingleMarkerChart, MarkerSelector } from '@/components/labs/LabChart'
+import { ConfirmDialog } from '@/components/common/Modal'
+import { Plus, TrendingUp, TrendingDown, Minus, Pencil, Trash2, LineChart, X } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
+import type { LabResult } from '@/types'
 
 export default function LabsPage() {
+  const queryClient = useQueryClient()
   const [selectedMarker, setSelectedMarker] = useState<string | null>(null)
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [editingLab, setEditingLab] = useState<LabResult | null>(null)
+  const [deletingLab, setDeletingLab] = useState<LabResult | null>(null)
+  const [showCharts, setShowCharts] = useState(false)
+  const [chartMarkers, setChartMarkers] = useState<string[]>([])
 
   const { data: labs, isLoading } = useQuery({
     queryKey: ['labs'],
@@ -19,6 +29,14 @@ export default function LabsPage() {
     queryFn: labsApi.getTrends,
   })
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => labsApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['labs'] })
+      setDeletingLab(null)
+    },
+  })
+
   // Group labs by date
   const labsByDate = labs?.reduce((acc, lab) => {
     const date = lab.test_date.split('T')[0]
@@ -26,6 +44,19 @@ export default function LabsPage() {
     acc[date].push(lab)
     return acc
   }, {} as Record<string, typeof labs>)
+
+  // Get unique markers for chart selection
+  const availableMarkers = useMemo(() => {
+    const markers = new Set<string>()
+    labs?.forEach((lab) => markers.add(lab.marker_name))
+    return Array.from(markers).sort()
+  }, [labs])
+
+  // Get data for selected marker
+  const selectedMarkerData = useMemo(() => {
+    if (!selectedMarker || !labs) return []
+    return labs.filter((lab) => lab.marker_name === selectedMarker)
+  }, [selectedMarker, labs])
 
   const getStatus = (value: number | null, min: number | null, max: number | null) => {
     if (value === null) return 'unknown'
@@ -41,6 +72,16 @@ export default function LabsPage() {
     unknown: { bg: 'bg-gray-500/10', text: 'text-gray-500', icon: Minus },
   }
 
+  const handleEdit = (lab: LabResult) => {
+    setEditingLab(lab)
+    setIsFormOpen(true)
+  }
+
+  const handleCloseForm = () => {
+    setIsFormOpen(false)
+    setEditingLab(null)
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -48,11 +89,72 @@ export default function LabsPage() {
           <h1 className="text-2xl font-bold">Анализы</h1>
           <p className="text-muted-foreground">История лабораторных исследований</p>
         </div>
-        <button className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-          <Plus className="h-4 w-4" />
-          Добавить результаты
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowCharts(!showCharts)}
+            className={cn(
+              'inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors',
+              showCharts
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted hover:bg-muted/80'
+            )}
+          >
+            <LineChart className="h-4 w-4" />
+            Графики
+          </button>
+          <button
+            onClick={() => setIsFormOpen(true)}
+            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          >
+            <Plus className="h-4 w-4" />
+            Добавить результаты
+          </button>
+        </div>
       </div>
+
+      {/* Charts Section */}
+      {showCharts && (
+        <Card title="Графики трендов" description="Динамика показателей по времени">
+          <div className="space-y-4">
+            <MarkerSelector
+              markers={availableMarkers}
+              selected={chartMarkers}
+              onChange={setChartMarkers}
+            />
+            {chartMarkers.length > 0 ? (
+              <div className="grid gap-6 md:grid-cols-2">
+                {chartMarkers.map((marker) => {
+                  const markerLabs = labs?.filter((l) => l.marker_name === marker) || []
+                  return (
+                    <div key={marker} className="p-4 border border-border rounded-lg">
+                      <SingleMarkerChart markerName={marker} data={markerLabs} />
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground py-8">
+                Выберите показатели для отображения графиков
+              </p>
+            )}
+          </div>
+        </Card>
+      )}
+
+      {/* Selected Marker Detail */}
+      {selectedMarker && selectedMarkerData.length > 0 && (
+        <Card className="relative">
+          <button
+            onClick={() => setSelectedMarker(null)}
+            className="absolute top-4 right-4 p-1 rounded hover:bg-muted transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+          <div className="p-4">
+            <SingleMarkerChart markerName={selectedMarker} data={selectedMarkerData} height={200} />
+          </div>
+        </Card>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Results list */}
@@ -77,11 +179,33 @@ export default function LabsPage() {
                         <div
                           key={lab.id}
                           className={cn(
-                            'flex items-center justify-between p-3 rounded-lg cursor-pointer',
+                            'flex items-center justify-between p-3 rounded-lg cursor-pointer group relative',
                             style.bg
                           )}
                           onClick={() => setSelectedMarker(lab.marker_name)}
                         >
+                          <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleEdit(lab)
+                              }}
+                              className="p-1 rounded bg-background/80 hover:bg-background transition-colors"
+                              title="Редактировать"
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setDeletingLab(lab)
+                              }}
+                              className="p-1 rounded bg-background/80 hover:bg-red-500/20 text-red-500 transition-colors"
+                              title="Удалить"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
                           <div>
                             <p className="font-medium text-sm">{lab.marker_name}</p>
                             {lab.reference_min !== null && lab.reference_max !== null && (
@@ -149,7 +273,11 @@ export default function LabsPage() {
           <Card title="Тренды" description="Динамика показателей">
             <div className="space-y-3">
               {trends?.slice(0, 5).map((trend) => (
-                <div key={trend.marker_name} className="space-y-1">
+                <div
+                  key={trend.marker_name}
+                  className="space-y-1 cursor-pointer hover:bg-muted/50 p-2 rounded -mx-2 transition-colors"
+                  onClick={() => setSelectedMarker(trend.marker_name)}
+                >
                   <div className="flex items-center justify-between text-sm">
                     <span>{trend.marker_name}</span>
                     <span className="font-medium">
@@ -170,6 +298,24 @@ export default function LabsPage() {
           </Card>
         </div>
       </div>
+
+      {/* Form Modal */}
+      <LabForm
+        isOpen={isFormOpen}
+        onClose={handleCloseForm}
+        labResult={editingLab}
+      />
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        isOpen={!!deletingLab}
+        onClose={() => setDeletingLab(null)}
+        onConfirm={() => deletingLab && deleteMutation.mutate(deletingLab.id)}
+        title="Удалить результат анализа?"
+        description={`Вы уверены, что хотите удалить результат "${deletingLab?.marker_name}"? Это действие нельзя отменить.`}
+        confirmText="Удалить"
+        isLoading={deleteMutation.isPending}
+      />
     </div>
   )
 }
