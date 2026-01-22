@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supplementsApi } from '@/api/client'
 import { Card } from '@/components/common/Card'
-import { Clock, CheckCircle2, Circle } from 'lucide-react'
+import { Clock, Circle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const timeLabels: Record<string, string> = {

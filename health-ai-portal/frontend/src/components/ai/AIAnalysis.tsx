@@ -5,7 +5,7 @@ import { Card } from '@/components/common/Card'
 import { cn } from '@/lib/utils'
 import { Brain, Shield, Scale, ChevronDown, ChevronUp, Loader2 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
-import type { Cycle, AIAnalyzeResponse } from '@/types'
+import type { Cycle } from '@/types'
 
 interface AIAnalysisProps {
   cycle: Cycle

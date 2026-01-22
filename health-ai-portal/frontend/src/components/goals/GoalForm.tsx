@@ -74,7 +74,7 @@ export function GoalForm({ isOpen, onClose, goal }: GoalFormProps) {
       current_value: data.current_value || null,
       target_value: data.target_value || null,
       strategy: data.strategy || null,
-      priority: data.priority || null,
+      priority: (data.priority || null) as Goal['priority'],
     }
 
     if (isEditing) {

@@ -15,12 +15,6 @@ const typeIcons = {
   workout: Dumbbell,
 }
 
-const typeLabels = {
-  supplement: 'Препарат',
-  lab: 'Анализ',
-  workout: 'Тренировка',
-}
-
 const dayLabels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 
 interface ReminderFormData {

@@ -1,5 +1,5 @@
 import { Card } from '@/components/common/Card'
-import { AlertTriangle, AlertCircle, Info, XCircle } from 'lucide-react'
+import { AlertTriangle, Info, XCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // Static alerts based on protocol

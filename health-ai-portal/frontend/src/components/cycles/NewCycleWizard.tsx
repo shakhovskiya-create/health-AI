@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { cyclesApi, aiApi } from '@/api/client'
 import { Modal } from '@/components/common/Modal'
-import { Input, Textarea, Select, Checkbox } from '@/components/common/Input'
+import { Input, Textarea, Checkbox } from '@/components/common/Input'
 import { cn } from '@/lib/utils'
 import { ChevronLeft, ChevronRight, Loader2, Brain, CheckCircle } from 'lucide-react'
 import type { CycleInputData, AIAnalyzeResponse } from '@/types'
@@ -68,7 +68,7 @@ export function NewCycleWizard({ isOpen, onClose }: NewCycleWizardProps) {
   const [cycleId, setCycleId] = useState<number | null>(null)
   const [analysisResult, setAnalysisResult] = useState<AIAnalyzeResponse | null>(null)
 
-  const { register, handleSubmit, watch, reset } = useForm<CycleInputData>({
+  const { register, handleSubmit, reset } = useForm<CycleInputData>({
     defaultValues,
   })
 

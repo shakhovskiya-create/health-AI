@@ -115,9 +115,7 @@ export function LabChart({
           labelStyle={{ color: 'hsl(var(--foreground))' }}
         />
         <Legend />
-        {markers.map((marker, index) => {
-          const _range = referenceRanges?.[marker.name]
-          return (
+        {markers.map((marker, index) => (
             <Line
               key={marker.name}
               type="monotone"
@@ -129,8 +127,7 @@ export function LabChart({
               activeDot={{ r: 6 }}
               connectNulls
             />
-          )
-        })}
+          ))}
       </LineChart>
     </ResponsiveContainer>
   )
