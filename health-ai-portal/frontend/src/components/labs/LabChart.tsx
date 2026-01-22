@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   LineChart,
   Line,
@@ -116,7 +116,7 @@ export function LabChart({
         />
         <Legend />
         {markers.map((marker, index) => {
-          const range = referenceRanges?.[marker.name]
+          const _range = referenceRanges?.[marker.name]
           return (
             <Line
               key={marker.name}
@@ -243,9 +243,9 @@ export function SingleMarkerChart({
             dataKey="value"
             stroke="#3b82f6"
             strokeWidth={2}
-            dot={(props) => {
+            dot={(props: { cx?: number; cy?: number; payload?: { value: number | null } }) => {
               const { cx, cy, payload } = props
-              if (payload.value === null) return null
+              if (!cx || !cy || !payload || payload.value === null) return <></>
               const isOutOfRange =
                 (refMin !== null && payload.value < refMin) ||
                 (refMax !== null && payload.value > refMax)

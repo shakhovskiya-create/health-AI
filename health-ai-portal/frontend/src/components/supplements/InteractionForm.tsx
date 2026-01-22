@@ -80,7 +80,7 @@ export function InteractionForm({ isOpen, onClose, interaction }: InteractionFor
     const payload = {
       supplement_1_id: parseInt(data.supplement_1_id),
       supplement_2_id: parseInt(data.supplement_2_id),
-      interaction_type: data.interaction_type || null,
+      interaction_type: (data.interaction_type || null) as Interaction['interaction_type'],
       description: data.description || null,
       solution: data.solution || null,
     }

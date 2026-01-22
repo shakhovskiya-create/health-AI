@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Modal } from '@/components/common/Modal'
-import { Input, Select } from '@/components/common/Input'
+import { Input } from '@/components/common/Input'
 import { cn } from '@/lib/utils'
 import { Upload, Plus, Trash2, Check, AlertCircle } from 'lucide-react'
 import api from '@/api/client'
@@ -20,20 +20,6 @@ interface ImportMarker {
   reference_max: number | null
   category: string
 }
-
-const categoryOptions = [
-  { value: 'hormones', label: 'Гормоны' },
-  { value: 'thyroid', label: 'Щитовидная железа' },
-  { value: 'lipids', label: 'Липиды' },
-  { value: 'liver', label: 'Печень' },
-  { value: 'kidney', label: 'Почки' },
-  { value: 'blood', label: 'Кровь' },
-  { value: 'metabolism', label: 'Метаболизм' },
-  { value: 'vitamins', label: 'Витамины' },
-  { value: 'inflammation', label: 'Воспаление' },
-  { value: 'iron', label: 'Железо' },
-  { value: 'other', label: 'Другое' },
-]
 
 const commonMarkers = [
   { name: 'Testosterone Total', unit: 'nmol/L', category: 'hormones' },
