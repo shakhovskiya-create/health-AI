@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: healthai-db
+    environment:
+      POSTGRES_USER: healthai
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-healthai123}
+      POSTGRES_DB: healthai
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U healthai"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: healthai-backend
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: healthai
+      DB_PASSWORD: ${DB_PASSWORD:-healthai123}
+      DB_NAME: healthai
+      SERVER_PORT: 8080
+      CLAUDE_API_KEY: ${CLAUDE_API_KEY:-}
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-key-change-me}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: healthai-frontend
+    environment:
+      VITE_API_URL: http://localhost:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
