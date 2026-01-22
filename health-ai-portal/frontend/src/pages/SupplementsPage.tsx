@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supplementsApi } from '@/api/client'
 import { Card } from '@/components/common/Card'
-import { Plus, Filter, Clock, Pill } from 'lucide-react'
+import { SupplementForm } from '@/components/supplements/SupplementForm'
+import { ConfirmDialog } from '@/components/common/Modal'
+import { Plus, Clock, Pill, Pencil, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Supplement } from '@/types'
 
@@ -22,15 +24,36 @@ const statusColors: Record<string, string> = {
 }
 
 export default function SupplementsPage() {
+  const queryClient = useQueryClient()
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [showForm, setShowForm] = useState(false)
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [editingSupplement, setEditingSupplement] = useState<Supplement | null>(null)
+  const [deletingSupplement, setDeletingSupplement] = useState<Supplement | null>(null)
 
   const { data: byCategory, isLoading } = useQuery({
     queryKey: ['supplements', 'by-category'],
     queryFn: supplementsApi.getByCategory,
   })
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => supplementsApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['supplements'] })
+      setDeletingSupplement(null)
+    },
+  })
+
   const categories = byCategory ? Object.keys(byCategory) : []
+
+  const handleEdit = (supplement: Supplement) => {
+    setEditingSupplement(supplement)
+    setIsFormOpen(true)
+  }
+
+  const handleCloseForm = () => {
+    setIsFormOpen(false)
+    setEditingSupplement(null)
+  }
 
   return (
     <div className="space-y-6">
@@ -40,7 +63,7 @@ export default function SupplementsPage() {
           <p className="text-muted-foreground">Управление вашим протоколом</p>
         </div>
         <button
-          onClick={() => setShowForm(true)}
+          onClick={() => setIsFormOpen(true)}
           className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
           <Plus className="h-4 w-4" />
@@ -97,10 +120,26 @@ export default function SupplementsPage() {
               </h2>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {byCategory?.[cat]?.map((supp: Supplement) => (
-                  <Card key={supp.id} className="p-4 hover:border-primary/50 transition-colors cursor-pointer">
+                  <Card key={supp.id} className="p-4 group relative">
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                      <button
+                        onClick={() => handleEdit(supp)}
+                        className="p-1.5 rounded-md bg-muted hover:bg-muted/80 transition-colors"
+                        title="Редактировать"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => setDeletingSupplement(supp)}
+                        className="p-1.5 rounded-md bg-red-500/10 hover:bg-red-500/20 text-red-500 transition-colors"
+                        title="Удалить"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                     <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-medium">{supp.name}</h3>
-                      <div className={cn('w-2 h-2 rounded-full', statusColors[supp.status])} />
+                      <h3 className="font-medium pr-16">{supp.name}</h3>
+                      <div className={cn('w-2 h-2 rounded-full absolute top-4 right-4 group-hover:opacity-0', statusColors[supp.status])} />
                     </div>
                     {supp.dose && (
                       <p className="text-sm text-primary font-medium mb-1">{supp.dose}</p>
@@ -138,6 +177,24 @@ export default function SupplementsPage() {
           ))}
         </div>
       )}
+
+      {/* Form Modal */}
+      <SupplementForm
+        isOpen={isFormOpen}
+        onClose={handleCloseForm}
+        supplement={editingSupplement}
+      />
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        isOpen={!!deletingSupplement}
+        onClose={() => setDeletingSupplement(null)}
+        onConfirm={() => deletingSupplement && deleteMutation.mutate(deletingSupplement.id)}
+        title="Удалить препарат?"
+        description={`Вы уверены, что хотите удалить "${deletingSupplement?.name}"? Это действие нельзя отменить.`}
+        confirmText="Удалить"
+        isLoading={deleteMutation.isPending}
+      />
     </div>
   )
 }
