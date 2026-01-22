@@ -9,11 +9,11 @@
 
 ```
 Phase 1: MVP Core ✅ ──────────────────────────► DONE (2026-01-22)
-Phase 2: Forms & Charts ◐ ───────────────────► IN PROGRESS
-Phase 3: AI Integration ◯ ────────────────────► PLANNED
-Phase 4: Notifications & Import ◯ ────────────► PLANNED
-Phase 5: Polish & Mobile ◯ ───────────────────► PLANNED
-Phase 6: Deployment (Replit + Supabase) ◯ ───► PLANNED
+Phase 2: Forms & Charts ✅ ───────────────────► DONE (2026-01-22)
+Phase 3: AI Integration ◐ ────────────────────► IN PROGRESS (90%)
+Phase 4: Notifications & Import ◐ ────────────► IN PROGRESS (80%)
+Phase 5: Polish & Mobile ✅ ───────────────────► DONE
+Phase 6: Deployment (Replit + Supabase) ◐ ───► CONFIG READY
 ```
 
 ---
@@ -72,28 +72,27 @@ Phase 6: Deployment (Replit + Supabase) ◯ ───► PLANNED
 
 ---
 
-## PHASE 3: AI INTEGRATION
+## PHASE 3: AI INTEGRATION ◐
 
-**Статус:** НЕ НАЧАТО
-**Приоритет:** MEDIUM
-**Оценка:** 5-7 дней
+**Статус:** В РАБОТЕ (Sprint 3.1-3.2 завершены)
+**Дата начала:** 2026-01-22
 
 ### Sprint 3.1 — Claude API
 | Задача | Приоритет | Оценка | Статус |
 |--------|-----------|--------|--------|
-| go-anthropic client setup | High | 2h | ◯ |
-| AI handler | High | 3h | ◯ |
-| Master Curator prompt | High | 2h | ◯ |
-| Red Team prompt | High | 2h | ◯ |
-| Meta-Supervisor prompt | High | 2h | ◯ |
+| go-anthropic client setup | High | 2h | ● |
+| AI handler | High | 3h | ● |
+| Master Curator prompt | High | 2h | ● |
+| Red Team prompt | High | 2h | ● |
+| Meta-Supervisor prompt | High | 2h | ● |
 
 ### Sprint 3.2 — Cycle Wizard
 | Задача | Приоритет | Оценка | Статус |
 |--------|-----------|--------|--------|
-| NewCycleWizard component | High | 4h | ◯ |
-| Input data forms | High | 3h | ◯ |
-| AI analysis trigger | Medium | 2h | ◯ |
-| AIAnalysis display component | Medium | 3h | ◯ |
+| NewCycleWizard component | High | 4h | ● |
+| Input data forms | High | 3h | ● |
+| AI analysis trigger | Medium | 2h | ● |
+| AIAnalysis display component | Medium | 3h | ● |
 
 ### Sprint 3.3 — Protocol Generator
 | Задача | Приоритет | Оценка | Статус |
@@ -104,25 +103,24 @@ Phase 6: Deployment (Replit + Supabase) ◯ ───► PLANNED
 
 ---
 
-## PHASE 4: NOTIFICATIONS & IMPORT
+## PHASE 4: NOTIFICATIONS & IMPORT ◐
 
-**Статус:** НЕ НАЧАТО
-**Приоритет:** LOW
-**Оценка:** 5-7 дней
+**Статус:** В РАБОТЕ
+**Дата начала:** 2026-01-22
 
 ### Sprint 4.1 — PDF Import
 | Задача | Приоритет | Оценка | Статус |
 |--------|-----------|--------|--------|
-| pdfcpu setup | Medium | 2h | ◯ |
-| Text extraction | Medium | 3h | ◯ |
-| Marker mapping | Medium | 4h | ◯ |
-| Import UI (drag-n-drop) | Medium | 2h | ◯ |
+| PDF parser (Go) | Medium | 2h | ● |
+| Marker mapping dictionary | Medium | 4h | ● |
+| Import API endpoint | Medium | 2h | ● |
+| Import UI component | Medium | 2h | ● |
 
 ### Sprint 4.2 — Notifications
 | Задача | Приоритет | Оценка | Статус |
 |--------|-----------|--------|--------|
-| Reminders CRUD API | Medium | 2h | ◯ |
-| Reminders UI | Medium | 2h | ◯ |
+| Reminders CRUD API | Medium | 2h | ● |
+| Reminders UI (Dashboard widget) | Medium | 2h | ● |
 | Service Worker | Low | 3h | ◯ |
 | Push notifications | Low | 3h | ◯ |
 
@@ -147,36 +145,35 @@ Phase 6: Deployment (Replit + Supabase) ◯ ───► PLANNED
 
 ---
 
-## PHASE 6: DEPLOYMENT (REPLIT + SUPABASE)
+## PHASE 6: DEPLOYMENT (REPLIT + SUPABASE) ◐
 
-**Статус:** НЕ НАЧАТО
-**Приоритет:** HIGH
-**Оценка:** 1-2 дня
+**Статус:** КОНФИГУРАЦИЯ ГОТОВА
+**Дата:** 2026-01-22
 
 ### Sprint 6.1 — Supabase Setup
 | Задача | Приоритет | Оценка | Статус |
 |--------|-----------|--------|--------|
-| Миграция схемы в Supabase | High | 2h | ◯ |
-| Connection string config | High | 1h | ◯ |
-| Seed данные | Medium | 1h | ◯ |
-| Row Level Security (RLS) | Medium | 2h | ◯ |
+| Миграция схемы в Supabase | High | 2h | ◯ (ручной SQL) |
+| Connection string config | High | 1h | ● (.env.example) |
+| Seed данные | Medium | 1h | ◯ (ручной) |
+| Row Level Security (RLS) | Medium | 2h | ◯ (опционально) |
 
 ### Sprint 6.2 — Replit Setup
 | Задача | Приоритет | Оценка | Статус |
 |--------|-----------|--------|--------|
-| Replit project setup | High | 1h | ◯ |
-| Environment variables | High | 30m | ◯ |
-| Backend build & run | High | 1h | ◯ |
-| Frontend build & serve | High | 1h | ◯ |
-| Replit Deployments config | High | 1h | ◯ |
+| Replit project setup | High | 1h | ● (.replit, replit.nix) |
+| Environment variables | High | 30m | ● (.env.example) |
+| Backend build & run | High | 1h | ● (Makefile) |
+| Frontend build & serve | High | 1h | ● (static serving) |
+| Replit Deployments config | High | 1h | ● (.replit) |
 
 ### Sprint 6.3 — Production Config
 | Задача | Приоритет | Оценка | Статус |
 |--------|-----------|--------|--------|
-| CORS для production | High | 30m | ◯ |
-| API URL config | High | 30m | ◯ |
-| Health checks | Medium | 30m | ◯ |
-| Logging | Low | 1h | ◯ |
+| CORS для production | High | 30m | ● (middleware) |
+| API URL config | High | 30m | ● (vite proxy) |
+| Health checks | Medium | 30m | ● (/health) |
+| Logging | Low | 1h | ● (chi middleware) |
 
 ---
 

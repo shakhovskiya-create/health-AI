@@ -3,9 +3,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { labsApi } from '@/api/client'
 import { Card } from '@/components/common/Card'
 import { LabForm } from '@/components/labs/LabForm'
+import { LabImport } from '@/components/labs/LabImport'
 import { SingleMarkerChart, MarkerSelector } from '@/components/labs/LabChart'
 import { ConfirmDialog } from '@/components/common/Modal'
-import { Plus, TrendingUp, TrendingDown, Minus, Pencil, Trash2, LineChart, X } from 'lucide-react'
+import { Plus, TrendingUp, TrendingDown, Minus, Pencil, Trash2, LineChart, X, Upload } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
 import type { LabResult } from '@/types'
@@ -18,6 +19,7 @@ export default function LabsPage() {
   const [deletingLab, setDeletingLab] = useState<LabResult | null>(null)
   const [showCharts, setShowCharts] = useState(false)
   const [chartMarkers, setChartMarkers] = useState<string[]>([])
+  const [isImportOpen, setIsImportOpen] = useState(false)
 
   const { data: labs, isLoading } = useQuery({
     queryKey: ['labs'],
@@ -103,11 +105,18 @@ export default function LabsPage() {
             Графики
           </button>
           <button
+            onClick={() => setIsImportOpen(true)}
+            className="inline-flex items-center gap-2 rounded-md bg-muted px-4 py-2 text-sm font-medium hover:bg-muted/80"
+          >
+            <Upload className="h-4 w-4" />
+            Импорт
+          </button>
+          <button
             onClick={() => setIsFormOpen(true)}
             className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
             <Plus className="h-4 w-4" />
-            Добавить результаты
+            Добавить
           </button>
         </div>
       </div>
@@ -316,6 +325,9 @@ export default function LabsPage() {
         confirmText="Удалить"
         isLoading={deleteMutation.isPending}
       />
+
+      {/* Import Modal */}
+      <LabImport isOpen={isImportOpen} onClose={() => setIsImportOpen(false)} />
     </div>
   )
 }

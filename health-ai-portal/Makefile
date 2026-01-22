@@ -52,3 +52,19 @@ migrate:
 fmt:
 	cd backend && go fmt ./...
 	cd frontend && npm run lint -- --fix
+
+# Production build for Replit
+build-prod:
+	@echo "Building frontend..."
+	cd frontend && npm install && npm run build
+	@echo "Building backend..."
+	cd backend && CGO_ENABLED=0 go build -o server cmd/server/main.go
+	@echo "Build complete!"
+
+# Run production (for Replit)
+run-prod:
+	cd backend && ./server
+
+# Replit deployment
+replit-deploy: build-prod
+	@echo "Ready for Replit deployment!"

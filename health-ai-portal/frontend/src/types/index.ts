@@ -120,3 +120,69 @@ export const priorityLabels: Record<Priority, string> = {
   medium: 'СРЕДНИЙ',
   background: 'ФОНОВЫЙ',
 }
+
+// AI Analysis types
+export interface AIAnalysisResult {
+  role: string
+  content: string
+  model?: string
+  tokens?: number
+}
+
+export interface AIAnalyzeResponse {
+  cycle_id?: number
+  results: Record<string, AIAnalysisResult>
+  created_at: string
+}
+
+export interface CycleInputData {
+  goals: string
+  wellbeing: {
+    sleep: string
+    energy: string
+    cognitive_clarity: string
+    libido: string
+    skin: string
+    gi: string
+    blood_pressure: string
+    other: string
+  }
+  training: {
+    frequency: string
+    split: string
+    exercises: string
+    steps: number
+    cardio: string
+  }
+  nutrition: {
+    calories: number
+    protein: number
+    carbs: number
+    fats: number
+    if: boolean
+    caffeine: boolean
+    alcohol: boolean
+  }
+  metrics: {
+    weight: number
+    blood_pressure: string
+    pulse: number
+    hrv: number
+    glucose: number
+  }
+  changes: string
+  ai_request: string
+}
+
+// Reminder types
+export interface Reminder {
+  id: number
+  user_id: number
+  reminder_type: 'supplement' | 'lab' | 'workout' | null
+  title: string
+  description: string | null
+  time: string | null
+  days_of_week: number[] | null
+  is_active: boolean
+  created_at: string
+}

@@ -162,6 +162,58 @@ func (h *LabHandler) GetByMarker(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, results)
 }
 
+type ImportLabsRequest struct {
+	LabName  string                  `json:"lab_name"`
+	TestDate string                  `json:"test_date"`
+	Markers  []ImportMarkerRequest   `json:"markers"`
+}
+
+type ImportMarkerRequest struct {
+	MarkerName   string   `json:"marker_name"`
+	Value        *float64 `json:"value"`
+	Unit         string   `json:"unit"`
+	ReferenceMin *float64 `json:"reference_min"`
+	ReferenceMax *float64 `json:"reference_max"`
+	Category     string   `json:"category"`
+}
+
+func (h *LabHandler) Import(w http.ResponseWriter, r *http.Request) {
+	userID := 1
+
+	var input ImportLabsRequest
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	if len(input.Markers) == 0 {
+		respondError(w, http.StatusBadRequest, "No markers to import")
+		return
+	}
+
+	var imported []models.LabResult
+	for _, marker := range input.Markers {
+		var result models.LabResult
+		err := h.db.Get(&result, `
+			INSERT INTO lab_results (user_id, test_date, lab_name, marker_name, value, unit, reference_min, reference_max, category)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+			RETURNING *
+		`, userID, input.TestDate, input.LabName, marker.MarkerName, marker.Value, marker.Unit, marker.ReferenceMin, marker.ReferenceMax, marker.Category)
+
+		if err != nil {
+			// Log error but continue with other markers
+			continue
+		}
+		imported = append(imported, result)
+	}
+
+	respondJSON(w, http.StatusCreated, map[string]interface{}{
+		"imported": len(imported),
+		"total":    len(input.Markers),
+		"results":  imported,
+	})
+}
+
 func (h *LabHandler) GetTrends(w http.ResponseWriter, r *http.Request) {
 	userID := 1
 

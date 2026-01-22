@@ -1,0 +1,24 @@
+run = "cd backend && go run cmd/server/main.go"
+entrypoint = "backend/cmd/server/main.go"
+
+hidden = [".config", "go.work"]
+
+[nix]
+channel = "stable-23_11"
+
+[deployment]
+run = ["sh", "-c", "cd backend && go build -o server cmd/server/main.go && ./server"]
+deploymentTarget = "cloudrun"
+ignorePorts = false
+
+[env]
+CGO_ENABLED = "0"
+GOFLAGS = "-buildvcs=false"
+
+[[ports]]
+localPort = 8080
+externalPort = 80
+
+[[ports]]
+localPort = 3000
+externalPort = 3000

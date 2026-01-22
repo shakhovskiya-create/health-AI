@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"health-ai-portal/internal/ai"
 	"health-ai-portal/internal/config"
 	"health-ai-portal/internal/database"
 	"health-ai-portal/internal/handlers"
@@ -40,11 +41,16 @@ func main() {
 		log.Printf("Warning: Failed to run migrations: %v", err)
 	}
 
+	// Initialize Claude AI client
+	claudeClient := ai.NewClaudeClient(cfg.ClaudeAPIKey)
+
 	// Initialize handlers
 	supplementHandler := handlers.NewSupplementHandler(db)
 	goalHandler := handlers.NewGoalHandler(db)
 	labHandler := handlers.NewLabHandler(db)
 	interactionHandler := handlers.NewInteractionHandler(db)
+	aiHandler := handlers.NewAIHandler(db, claudeClient)
+	reminderHandler := handlers.NewReminderHandler(db)
 
 	// Setup router
 	r := chi.NewRouter()
@@ -87,6 +93,7 @@ func main() {
 		r.Route("/labs", func(r chi.Router) {
 			r.Get("/", labHandler.List)
 			r.Post("/", labHandler.Create)
+			r.Post("/import", labHandler.Import)
 			r.Get("/trends", labHandler.GetTrends)
 			r.Get("/marker/{name}", labHandler.GetByMarker)
 			r.Get("/{id}", labHandler.Get)
@@ -103,6 +110,23 @@ func main() {
 			r.Delete("/{id}", interactionHandler.Delete)
 		})
 
+		// AI
+		r.Route("/ai", func(r chi.Router) {
+			r.Post("/analyze", aiHandler.Analyze)
+			r.Get("/analysis/{cycleId}", aiHandler.GetAnalysis)
+		})
+
+		// Reminders
+		r.Route("/reminders", func(r chi.Router) {
+			r.Get("/", reminderHandler.List)
+			r.Post("/", reminderHandler.Create)
+			r.Get("/today", reminderHandler.GetToday)
+			r.Get("/{id}", reminderHandler.Get)
+			r.Put("/{id}", reminderHandler.Update)
+			r.Delete("/{id}", reminderHandler.Delete)
+			r.Post("/{id}/toggle", reminderHandler.Toggle)
+		})
+
 		// Dashboard summary
 		r.Get("/dashboard/summary", func(w http.ResponseWriter, r *http.Request) {
 			// TODO: Implement dashboard summary
@@ -111,6 +135,30 @@ func main() {
 			w.Write([]byte(`{"status": "ok", "message": "Dashboard endpoint"}`))
 		})
 	})
+
+	// Serve static files in production (frontend build)
+	staticDir := os.Getenv("STATIC_DIR")
+	if staticDir == "" {
+		staticDir = "../frontend/dist"
+	}
+
+	// Check if static dir exists
+	if _, err := os.Stat(staticDir); err == nil {
+		log.Printf("Serving static files from %s", staticDir)
+
+		// Serve static files
+		fs := http.FileServer(http.Dir(staticDir))
+		r.Handle("/*", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			// Try to serve static file
+			path := staticDir + req.URL.Path
+			if _, err := os.Stat(path); os.IsNotExist(err) {
+				// If file doesn't exist, serve index.html (SPA routing)
+				http.ServeFile(w, req, staticDir+"/index.html")
+				return
+			}
+			fs.ServeHTTP(w, req)
+		}))
+	}
 
 	// Start server
 	addr := ":" + cfg.ServerPort

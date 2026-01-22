@@ -1,6 +1,7 @@
 import GoalsWidget from '@/components/dashboard/GoalsWidget'
 import ScheduleWidget from '@/components/dashboard/ScheduleWidget'
 import AlertsWidget from '@/components/dashboard/AlertsWidget'
+import RemindersWidget from '@/components/dashboard/RemindersWidget'
 import { Card } from '@/components/common/Card'
 import { Activity, TrendingUp, Moon, Zap } from 'lucide-react'
 
@@ -41,7 +42,7 @@ export default function DashboardPage() {
       {/* Main content */}
       <div className="grid gap-6 lg:grid-cols-3">
         <GoalsWidget />
-        <AlertsWidget />
+        <RemindersWidget />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">

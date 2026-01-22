@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Supplement, Goal, LabResult, LabTrend, Cycle, ScheduleItem, Interaction } from '@/types'
+import type { Supplement, Goal, LabResult, LabTrend, Cycle, ScheduleItem, Interaction, AIAnalyzeResponse, Reminder } from '@/types'
 
 const api = axios.create({
   baseURL: '/api',
@@ -105,6 +105,39 @@ export const cyclesApi = {
 
   update: (id: number, data: Partial<Cycle>) =>
     api.put<Cycle>(`/cycles/${id}`, data).then((r) => r.data),
+}
+
+// AI
+export const aiApi = {
+  analyze: (data: { cycle_id?: number; role?: string; input_data?: string }) =>
+    api.post<AIAnalyzeResponse>('/ai/analyze', data).then((r) => r.data),
+
+  getAnalysis: (cycleId: number) =>
+    api.get<AIAnalyzeResponse>(`/ai/analysis/${cycleId}`).then((r) => r.data),
+}
+
+// Reminders
+export const remindersApi = {
+  list: (params?: { active?: boolean }) =>
+    api.get<Reminder[]>('/reminders', { params }).then((r) => r.data),
+
+  get: (id: number) =>
+    api.get<Reminder>(`/reminders/${id}`).then((r) => r.data),
+
+  create: (data: Partial<Reminder>) =>
+    api.post<Reminder>('/reminders', data).then((r) => r.data),
+
+  update: (id: number, data: Partial<Reminder>) =>
+    api.put<Reminder>(`/reminders/${id}`, data).then((r) => r.data),
+
+  delete: (id: number) =>
+    api.delete(`/reminders/${id}`),
+
+  toggle: (id: number) =>
+    api.post<Reminder>(`/reminders/${id}/toggle`).then((r) => r.data),
+
+  getToday: () =>
+    api.get<Reminder[]>('/reminders/today').then((r) => r.data),
 }
 
 // Dashboard

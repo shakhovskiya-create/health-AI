@@ -1,0 +1,24 @@
+[build]
+builder = "nixpacks"
+
+[build.nixpacksPlan.phases.setup]
+nixPkgs = ["go_1_22", "nodejs_20"]
+
+[build.nixpacksPlan.phases.install]
+cmds = ["cd frontend && npm install"]
+
+[build.nixpacksPlan.phases.build]
+cmds = [
+  "cd frontend && npm run build",
+  "cd backend && CGO_ENABLED=0 go build -o server cmd/server/main.go"
+]
+
+[deploy]
+startCommand = "cd backend && ./server"
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+[[services]]
+port = 8080

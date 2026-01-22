@@ -122,3 +122,31 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
 )
 
 Select.displayName = 'Select'
+
+interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
+  label?: string
+}
+
+export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
+  ({ className, label, id, ...props }, ref) => {
+    return (
+      <label className="inline-flex items-center gap-2 cursor-pointer">
+        <input
+          type="checkbox"
+          id={id}
+          ref={ref}
+          className={cn(
+            'w-4 h-4 rounded border-border bg-background',
+            'focus:outline-none focus:ring-2 focus:ring-ring',
+            'checked:bg-primary checked:border-primary',
+            className
+          )}
+          {...props}
+        />
+        {label && <span className="text-sm">{label}</span>}
+      </label>
+    )
+  }
+)
+
+Checkbox.displayName = 'Checkbox'
