@@ -1,5 +1,7 @@
 package ai
 
+const LabParserPrompt = `Ты парсер лабораторных анализов. Верни ТОЛЬКО JSON массив без дополнительного текста.`
+
 const MasterCuratorPrompt = `# 01 — Master Curator
 ## Персональный куратор здоровья, ГЗТ и performance (evidence-based)
 

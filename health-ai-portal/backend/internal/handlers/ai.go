@@ -144,6 +144,125 @@ func (h *AIHandler) getCycle(id int) (*models.Cycle, error) {
 	return &cycle, err
 }
 
+// ParseLabText parses lab results text using AI
+type ParseLabRequest struct {
+	Text     string `json:"text"`
+	LabName  string `json:"lab_name"`
+	TestDate string `json:"test_date"`
+}
+
+type ParsedMarker struct {
+	MarkerName   string   `json:"marker_name"`
+	Value        *float64 `json:"value"`
+	Unit         string   `json:"unit"`
+	ReferenceMin *float64 `json:"reference_min"`
+	ReferenceMax *float64 `json:"reference_max"`
+	Category     string   `json:"category"`
+}
+
+type ParseLabResponse struct {
+	LabName  string         `json:"lab_name"`
+	TestDate string         `json:"test_date"`
+	Markers  []ParsedMarker `json:"markers"`
+	RawText  string         `json:"raw_text,omitempty"`
+}
+
+func (h *AIHandler) ParseLabText(w http.ResponseWriter, r *http.Request) {
+	var req ParseLabRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	if req.Text == "" {
+		respondError(w, http.StatusBadRequest, "Text is required")
+		return
+	}
+
+	ctx := r.Context()
+
+	// Use Claude to parse the lab text
+	prompt := `Ты парсер лабораторных анализов. Извлеки все показатели из текста ниже.
+
+Верни ТОЛЬКО JSON массив без дополнительного текста. Формат каждого элемента:
+{
+  "marker_name": "название показателя (на английском, стандартное)",
+  "value": числовое_значение или null,
+  "unit": "единицы измерения",
+  "reference_min": минимум_нормы или null,
+  "reference_max": максимум_нормы или null,
+  "category": "категория"
+}
+
+Категории: hormones, thyroid, lipids, liver, kidney, blood, inflammation, vitamins, minerals, metabolism, other
+
+Стандартные названия маркеров (используй их):
+- Testosterone Total, Testosterone Free, Estradiol, Prolactin, LH, FSH, SHBG, DHEA-S
+- TSH, fT3, fT4
+- Cortisol, ACTH, Insulin, Glucose, HbA1c
+- Cholesterol Total, LDL, HDL, Triglycerides
+- ALT, AST, GGT, Bilirubin Total
+- Creatinine, Urea, Uric Acid
+- Ferritin, Iron, Vitamin D, Vitamin B12, Folate
+- Hemoglobin, Hematocrit, RBC, WBC, Platelets, ESR
+- CRP, Homocysteine, IGF-1
+
+ТЕКСТ ДЛЯ ПАРСИНГА:
+` + req.Text
+
+	result, err := h.claude.Analyze(ctx, ai.AnalysisRequest{
+		Role:      "lab_parser",
+		InputData: prompt,
+	})
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "AI parsing failed: "+err.Error())
+		return
+	}
+
+	// Parse Claude's response
+	var markers []ParsedMarker
+	content := result.Content
+
+	// Try to extract JSON from response
+	start := -1
+	end := -1
+	bracketCount := 0
+	for i, c := range content {
+		if c == '[' {
+			if start == -1 {
+				start = i
+			}
+			bracketCount++
+		} else if c == ']' {
+			bracketCount--
+			if bracketCount == 0 && start != -1 {
+				end = i + 1
+				break
+			}
+		}
+	}
+
+	if start != -1 && end != -1 {
+		jsonStr := content[start:end]
+		if err := json.Unmarshal([]byte(jsonStr), &markers); err != nil {
+			// Return raw response if parsing fails
+			respondJSON(w, http.StatusOK, ParseLabResponse{
+				LabName:  req.LabName,
+				TestDate: req.TestDate,
+				Markers:  []ParsedMarker{},
+				RawText:  content,
+			})
+			return
+		}
+	}
+
+	respondJSON(w, http.StatusOK, ParseLabResponse{
+		LabName:  req.LabName,
+		TestDate: req.TestDate,
+		Markers:  markers,
+	})
+}
+
 func (h *AIHandler) saveAnalysisResults(cycleID int, results map[string]*ai.AnalysisResponse) error {
 	var masterOutput, redTeamOutput, metaOutput *string
 

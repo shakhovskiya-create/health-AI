@@ -78,6 +78,8 @@ func (c *ClaudeClient) buildPrompt(req AnalysisRequest) string {
 		systemPrompt = RedTeamPrompt
 	case "meta_supervisor":
 		systemPrompt = MetaSupervisorPrompt
+	case "lab_parser":
+		systemPrompt = LabParserPrompt
 	default:
 		systemPrompt = MasterCuratorPrompt
 	}

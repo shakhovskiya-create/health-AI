@@ -119,6 +119,7 @@ func main() {
 		// AI
 		r.Route("/ai", func(r chi.Router) {
 			r.Post("/analyze", aiHandler.Analyze)
+			r.Post("/parse-labs", aiHandler.ParseLabText)
 			r.Get("/analysis/{cycleId}", aiHandler.GetAnalysis)
 		})
 
