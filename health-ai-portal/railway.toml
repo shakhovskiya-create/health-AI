@@ -2,7 +2,7 @@
 builder = "nixpacks"
 
 [build.nixpacksPlan.phases.setup]
-nixPkgs = ["go_1_22", "nodejs_20"]
+nixPkgs = ["go", "nodejs"]
 
 [build.nixpacksPlan.phases.install]
 cmds = ["cd frontend && npm install"]
@@ -19,6 +19,3 @@ healthcheckPath = "/health"
 healthcheckTimeout = 30
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
-
-[[services]]
-port = 8080
