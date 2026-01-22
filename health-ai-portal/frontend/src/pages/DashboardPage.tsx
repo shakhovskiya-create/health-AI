@@ -1,6 +1,5 @@
 import GoalsWidget from '@/components/dashboard/GoalsWidget'
 import ScheduleWidget from '@/components/dashboard/ScheduleWidget'
-import AlertsWidget from '@/components/dashboard/AlertsWidget'
 import RemindersWidget from '@/components/dashboard/RemindersWidget'
 import { Card } from '@/components/common/Card'
 import { Activity, TrendingUp, Moon, Zap } from 'lucide-react'

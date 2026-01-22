@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { AlertTriangle, AlertCircle, Sparkles, ChevronDown, ChevronUp, Filter } from 'lucide-react'
+import { AlertTriangle, AlertCircle, Sparkles, ChevronDown, ChevronUp } from 'lucide-react'
 import type { Interaction, Supplement } from '@/types'
 
 interface InteractionsTableProps {
@@ -35,7 +35,7 @@ const interactionTypeConfig = {
 
 export function InteractionsTable({
   interactions,
-  supplements,
+  supplements: _supplements,
   onEdit,
   onDelete,
 }: InteractionsTableProps) {

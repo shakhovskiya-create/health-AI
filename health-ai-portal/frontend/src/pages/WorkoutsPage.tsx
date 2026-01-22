@@ -1,5 +1,5 @@
 import { Card } from '@/components/common/Card'
-import { Plus, Calendar, Dumbbell, TrendingUp } from 'lucide-react'
+import { Plus, Dumbbell } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // Mock workout plan

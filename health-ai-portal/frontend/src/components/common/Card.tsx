@@ -6,11 +6,12 @@ interface CardProps {
   title?: string
   description?: string
   action?: React.ReactNode
+  onClick?: () => void
 }
 
-export function Card({ children, className, title, description, action }: CardProps) {
+export function Card({ children, className, title, description, action, onClick }: CardProps) {
   return (
-    <div className={cn('rounded-lg border border-border bg-card p-6', className)}>
+    <div className={cn('rounded-lg border border-border bg-card p-6', className)} onClick={onClick}>
       {(title || action) && (
         <div className="flex items-center justify-between mb-4">
           <div>

@@ -96,10 +96,10 @@ export function SupplementForm({ isOpen, onClose, supplement }: SupplementFormPr
       ...data,
       dose: data.dose || null,
       time_of_day: data.time_of_day || null,
-      category: data.category || null,
+      category: (data.category || null) as Supplement['category'],
       mechanism: data.mechanism || null,
       target: data.target || null,
-      evidence_level: data.evidence_level || null,
+      evidence_level: (data.evidence_level || null) as Supplement['evidence_level'],
       notes: data.notes || null,
     }
 
