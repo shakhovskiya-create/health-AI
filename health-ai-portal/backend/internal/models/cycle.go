@@ -6,20 +6,20 @@ import (
 )
 
 type Cycle struct {
-	ID                   int             `db:"id" json:"id"`
-	UserID               int             `db:"user_id" json:"user_id"`
-	CycleDate            time.Time       `db:"cycle_date" json:"cycle_date"`
-	CycleType            *string         `db:"cycle_type" json:"cycle_type"`
-	Verdict              *string         `db:"verdict" json:"verdict"`
-	InputData            json.RawMessage `db:"input_data" json:"input_data"`
-	MasterCuratorOutput  *string         `db:"master_curator_output" json:"master_curator_output"`
-	RedTeamOutput        *string         `db:"red_team_output" json:"red_team_output"`
-	MetaSupervisorOutput *string         `db:"meta_supervisor_output" json:"meta_supervisor_output"`
-	Decisions            json.RawMessage `db:"decisions" json:"decisions"`
-	RequiredLabs         json.RawMessage `db:"required_labs" json:"required_labs"`
-	NextReviewDate       *time.Time      `db:"next_review_date" json:"next_review_date"`
-	CreatedAt            time.Time       `db:"created_at" json:"created_at"`
-	UpdatedAt            time.Time       `db:"updated_at" json:"updated_at"`
+	ID                   int              `db:"id" json:"id"`
+	UserID               int              `db:"user_id" json:"user_id"`
+	CycleDate            time.Time        `db:"cycle_date" json:"cycle_date"`
+	CycleType            *string          `db:"cycle_type" json:"cycle_type"`
+	Verdict              *string          `db:"verdict" json:"verdict"`
+	InputData            *json.RawMessage `db:"input_data" json:"input_data"`
+	MasterCuratorOutput  *string          `db:"master_curator_output" json:"master_curator_output"`
+	RedTeamOutput        *string          `db:"red_team_output" json:"red_team_output"`
+	MetaSupervisorOutput *string          `db:"meta_supervisor_output" json:"meta_supervisor_output"`
+	Decisions            *json.RawMessage `db:"decisions" json:"decisions"`
+	RequiredLabs         *json.RawMessage `db:"required_labs" json:"required_labs"`
+	NextReviewDate       *time.Time       `db:"next_review_date" json:"next_review_date"`
+	CreatedAt            time.Time        `db:"created_at" json:"created_at"`
+	UpdatedAt            time.Time        `db:"updated_at" json:"updated_at"`
 }
 
 type CycleCreate struct {

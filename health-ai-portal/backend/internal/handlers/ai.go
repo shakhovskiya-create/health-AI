@@ -50,7 +50,9 @@ func (h *AIHandler) Analyze(w http.ResponseWriter, r *http.Request) {
 			respondError(w, http.StatusNotFound, "Cycle not found")
 			return
 		}
-		inputData = string(cycle.InputData)
+		if cycle.InputData != nil {
+			inputData = string(*cycle.InputData)
+		}
 	}
 
 	if inputData == "" {

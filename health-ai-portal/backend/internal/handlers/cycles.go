@@ -53,7 +53,7 @@ func (h *CycleHandler) Get(w http.ResponseWriter, r *http.Request) {
 func (h *CycleHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var input models.CycleCreate
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		respondError(w, http.StatusBadRequest, "Invalid request body")
+		respondError(w, http.StatusBadRequest, "Invalid request body: "+err.Error())
 		return
 	}
 
@@ -62,12 +62,18 @@ func (h *CycleHandler) Create(w http.ResponseWriter, r *http.Request) {
 		input.CycleDate = time.Now()
 	}
 
+	// Ensure input_data is valid JSON (use empty object if nil)
+	inputData := input.InputData
+	if inputData == nil || len(inputData) == 0 {
+		inputData = json.RawMessage(`{}`)
+	}
+
 	var cycle models.Cycle
 	err := h.db.DB.QueryRowx(`
 		INSERT INTO cycles (user_id, cycle_date, cycle_type, input_data, next_review_date)
 		VALUES (1, $1, $2, $3, $4)
 		RETURNING *
-	`, input.CycleDate, input.CycleType, input.InputData, input.NextReviewDate).StructScan(&cycle)
+	`, input.CycleDate, input.CycleType, inputData, input.NextReviewDate).StructScan(&cycle)
 
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to create cycle: "+err.Error())
