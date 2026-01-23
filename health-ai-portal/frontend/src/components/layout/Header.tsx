@@ -4,6 +4,7 @@ import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { useQuery } from '@tanstack/react-query'
 import { remindersApi } from '@/api/client'
+import type { Reminder } from '@/types'
 
 export default function Header() {
   const [isDark, setIsDark] = useState(false)
@@ -29,7 +30,7 @@ export default function Header() {
     localStorage.setItem('theme', newIsDark ? 'dark' : 'light')
   }
 
-  const pendingReminders = reminders?.filter((r: { completed: boolean }) => !r.completed) || []
+  const pendingReminders = reminders?.filter((r: Reminder) => r.is_active) || []
 
   return (
     <header className="h-16 border-b border-border bg-card px-6 flex items-center justify-between">
@@ -93,15 +94,15 @@ export default function Header() {
               </div>
               <div className="max-h-64 overflow-y-auto">
                 {pendingReminders.length > 0 ? (
-                  pendingReminders.map((reminder: { id: number; title: string; scheduled_time?: string }) => (
+                  pendingReminders.map((reminder: Reminder) => (
                     <div
                       key={reminder.id}
                       className="p-3 border-b border-border last:border-0 hover:bg-accent/50"
                     >
                       <p className="text-sm font-medium">{reminder.title}</p>
-                      {reminder.scheduled_time && (
+                      {reminder.time && (
                         <p className="text-xs text-muted-foreground mt-1">
-                          {reminder.scheduled_time}
+                          {reminder.time}
                         </p>
                       )}
                     </div>
