@@ -86,18 +86,37 @@ export function NewCycleWizard({ isOpen, onClose }: NewCycleWizardProps) {
   })
 
   const analyzeMutation = useMutation({
-    mutationFn: (inputData: string) =>
-      aiApi.analyze({ input_data: inputData, role: 'full' }),
+    mutationFn: async ({ inputData, cycleId }: { inputData: string; cycleId: number }) => {
+      // Run AI analysis with cycle_id so backend saves results
+      const result = await aiApi.analyze({
+        input_data: inputData,
+        role: 'full',
+        cycle_id: cycleId,
+      })
+
+      // Determine verdict based on meta_supervisor output
+      const metaContent = result.results.meta_supervisor?.content || ''
+      let verdict: 'go' | 'wait' | 'stop' = 'wait'
+      if (metaContent.includes('🟢') || metaContent.toLowerCase().includes('допустимо')) {
+        verdict = 'go'
+      } else if (metaContent.includes('🔴') || metaContent.toLowerCase().includes('недопустимо') || metaContent.toLowerCase().includes('стоп')) {
+        verdict = 'stop'
+      }
+
+      // Update cycle with AI outputs and verdict
+      await cyclesApi.update(cycleId, {
+        master_curator_output: result.results.master_curator?.content,
+        red_team_output: result.results.red_team?.content,
+        meta_supervisor_output: result.results.meta_supervisor?.content,
+        verdict,
+      })
+
+      return result
+    },
     onSuccess: (result) => {
       setAnalysisResult(result)
       setCurrentStep('complete')
-      if (cycleId) {
-        cyclesApi.update(cycleId, {
-          master_curator_output: result.results.master_curator?.content,
-          red_team_output: result.results.red_team?.content,
-          meta_supervisor_output: result.results.meta_supervisor?.content,
-        })
-      }
+      queryClient.invalidateQueries({ queryKey: ['cycles'] })
     },
     onError: () => {
       setCurrentStep('request')
@@ -173,11 +192,11 @@ ${data.ai_request || 'Полный анализ текущего состоян�
     setCurrentStep('analyzing')
 
     // Create cycle first
-    await createCycleMutation.mutateAsync(data)
+    const cycle = await createCycleMutation.mutateAsync(data)
 
-    // Then run AI analysis
+    // Then run AI analysis with cycle ID
     const inputDataStr = formatInputDataForAI(data)
-    analyzeMutation.mutate(inputDataStr)
+    analyzeMutation.mutate({ inputData: inputDataStr, cycleId: cycle.id })
   }
 
   const handleClose = () => {
