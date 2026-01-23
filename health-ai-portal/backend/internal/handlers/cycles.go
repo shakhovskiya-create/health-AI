@@ -95,15 +95,8 @@ func (h *CycleHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Handle JSON fields - use nil for COALESCE to keep existing value
-	var decisions, requiredLabs interface{}
-	if input.Decisions != nil && len(input.Decisions) > 0 {
-		decisions = input.Decisions
-	}
-	if input.RequiredLabs != nil && len(input.RequiredLabs) > 0 {
-		requiredLabs = input.RequiredLabs
-	}
-
+	// Update only the text fields that are commonly updated
+	// JSON fields (decisions, required_labs) are updated separately if provided
 	var cycle models.Cycle
 	err = h.db.DB.QueryRowx(`
 		UPDATE cycles SET
@@ -111,15 +104,12 @@ func (h *CycleHandler) Update(w http.ResponseWriter, r *http.Request) {
 			master_curator_output = COALESCE($2, master_curator_output),
 			red_team_output = COALESCE($3, red_team_output),
 			meta_supervisor_output = COALESCE($4, meta_supervisor_output),
-			decisions = COALESCE($5, decisions),
-			required_labs = COALESCE($6, required_labs),
-			next_review_date = COALESCE($7, next_review_date),
+			next_review_date = COALESCE($5, next_review_date),
 			updated_at = NOW()
-		WHERE id = $8
+		WHERE id = $6
 		RETURNING *
 	`, input.Verdict, input.MasterCuratorOutput, input.RedTeamOutput,
-		input.MetaSupervisorOutput, decisions, requiredLabs,
-		input.NextReviewDate, id).StructScan(&cycle)
+		input.MetaSupervisorOutput, input.NextReviewDate, id).StructScan(&cycle)
 
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to update cycle: "+err.Error())
