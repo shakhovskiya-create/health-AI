@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { aiApi } from '@/api/client'
 import { Card } from '@/components/common/Card'
 import { cn } from '@/lib/utils'
-import { Brain, Shield, Scale, ChevronDown, ChevronUp, Loader2 } from 'lucide-react'
+import { Brain, Shield, Scale, Lightbulb, ChevronDown, ChevronUp, Loader2 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import type { Cycle } from '@/types'
 
@@ -12,6 +12,14 @@ interface AIAnalysisProps {
 }
 
 const roleConfig = {
+  research_strategy_lead: {
+    title: 'Research & Strategy Lead',
+    description: 'Исследование, моделирование и стратегический синтез',
+    icon: Lightbulb,
+    color: 'text-purple-500',
+    bgColor: 'bg-purple-500/10',
+    borderColor: 'border-purple-500/30',
+  },
   master_curator: {
     title: 'Master Curator',
     description: 'Клинический анализ и рекомендации',
@@ -80,6 +88,7 @@ function RoleSection({ role, content }: { role: RoleKey; content: string }) {
 
 export function AIAnalysis({ cycle }: AIAnalysisProps) {
   const hasLocalData =
+    cycle.rsl_output ||
     cycle.master_curator_output ||
     cycle.red_team_output ||
     cycle.meta_supervisor_output
@@ -91,6 +100,9 @@ export function AIAnalysis({ cycle }: AIAnalysisProps) {
   })
 
   // Use local cycle data if available, otherwise use fetched data
+  const rslContent =
+    cycle.rsl_output ||
+    analysisData?.results?.research_strategy_lead?.content
   const masterCuratorContent =
     cycle.master_curator_output ||
     analysisData?.results?.master_curator?.content
@@ -110,7 +122,7 @@ export function AIAnalysis({ cycle }: AIAnalysisProps) {
     )
   }
 
-  if (!masterCuratorContent && !redTeamContent && !metaSupervisorContent) {
+  if (!rslContent && !masterCuratorContent && !redTeamContent && !metaSupervisorContent) {
     return (
       <Card title="AI Анализ">
         <p className="text-center text-muted-foreground py-8">
@@ -128,6 +140,9 @@ export function AIAnalysis({ cycle }: AIAnalysisProps) {
       </h2>
 
       <div className="space-y-4">
+        {rslContent && (
+          <RoleSection role="research_strategy_lead" content={rslContent} />
+        )}
         {masterCuratorContent && (
           <RoleSection role="master_curator" content={masterCuratorContent} />
         )}
@@ -175,6 +190,12 @@ export function AIAnalysisStandalone({ cycleId }: { cycleId: number }) {
       </h2>
 
       <div className="space-y-4">
+        {analysisData.results.research_strategy_lead && (
+          <RoleSection
+            role="research_strategy_lead"
+            content={analysisData.results.research_strategy_lead.content}
+          />
+        )}
         {analysisData.results.master_curator && (
           <RoleSection
             role="master_curator"

@@ -101,14 +101,15 @@ func (h *CycleHandler) Update(w http.ResponseWriter, r *http.Request) {
 	err = h.db.DB.QueryRowx(`
 		UPDATE cycles SET
 			verdict = COALESCE($1, verdict),
-			master_curator_output = COALESCE($2, master_curator_output),
-			red_team_output = COALESCE($3, red_team_output),
-			meta_supervisor_output = COALESCE($4, meta_supervisor_output),
-			next_review_date = COALESCE($5, next_review_date),
+			rsl_output = COALESCE($2, rsl_output),
+			master_curator_output = COALESCE($3, master_curator_output),
+			red_team_output = COALESCE($4, red_team_output),
+			meta_supervisor_output = COALESCE($5, meta_supervisor_output),
+			next_review_date = COALESCE($6, next_review_date),
 			updated_at = NOW()
-		WHERE id = $6
+		WHERE id = $7
 		RETURNING *
-	`, input.Verdict, input.MasterCuratorOutput, input.RedTeamOutput,
+	`, input.Verdict, input.RSLOutput, input.MasterCuratorOutput, input.RedTeamOutput,
 		input.MetaSupervisorOutput, input.NextReviewDate, id).StructScan(&cycle)
 
 	if err != nil {

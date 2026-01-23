@@ -105,6 +105,7 @@ export function NewCycleWizard({ isOpen, onClose }: NewCycleWizardProps) {
 
       // Update cycle with AI outputs and verdict
       await cyclesApi.update(cycleId, {
+        rsl_output: result.results.research_strategy_lead?.content,
         master_curator_output: result.results.master_curator?.content,
         red_team_output: result.results.red_team?.content,
         meta_supervisor_output: result.results.meta_supervisor?.content,
@@ -435,8 +436,12 @@ ${data.ai_request || 'Полный анализ текущего состоян�
             </p>
             <div className="space-y-2 text-left max-w-xs mx-auto">
               <div className="flex items-center gap-2 text-sm">
-                <Brain className="h-4 w-4 text-blue-500" />
-                <span>Master Curator анализирует...</span>
+                <Brain className="h-4 w-4 text-purple-500" />
+                <span>Research & Strategy Lead анализирует...</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Brain className="h-4 w-4" />
+                <span>Master Curator ожидает...</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Brain className="h-4 w-4" />
@@ -459,6 +464,14 @@ ${data.ai_request || 'Полный анализ текущего состоян�
               Цикл #{cycleId} создан. Результаты сохранены.
             </p>
             <div className="space-y-2 text-left">
+              {analysisResult.results.research_strategy_lead && (
+                <div className="p-3 bg-purple-500/10 rounded-lg">
+                  <p className="text-sm font-medium text-purple-500">Research & Strategy Lead</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {analysisResult.results.research_strategy_lead.content.slice(0, 150)}...
+                  </p>
+                </div>
+              )}
               {analysisResult.results.master_curator && (
                 <div className="p-3 bg-blue-500/10 rounded-lg">
                   <p className="text-sm font-medium text-blue-500">Master Curator</p>

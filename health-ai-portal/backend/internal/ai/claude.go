@@ -72,6 +72,8 @@ func (c *ClaudeClient) buildPrompt(req AnalysisRequest) string {
 	var systemPrompt string
 
 	switch req.Role {
+	case "research_strategy_lead":
+		systemPrompt = ResearchStrategyLeadPrompt
 	case "master_curator":
 		systemPrompt = MasterCuratorPrompt
 	case "red_team":
@@ -95,22 +97,38 @@ func (c *ClaudeClient) buildPrompt(req AnalysisRequest) string {
 	return prompt
 }
 
-// RunFullCycle runs all three roles in sequence
+// RunFullCycle runs all four roles in sequence: RSL → Curator → Red Team → Meta-Supervisor
 func (c *ClaudeClient) RunFullCycle(ctx context.Context, inputData string) (map[string]*AnalysisResponse, error) {
 	results := make(map[string]*AnalysisResponse)
 
-	// 1. Master Curator
+	// 1. Research & Strategy Lead (RSL) - first, no context
+	rslResp, err := c.Analyze(ctx, AnalysisRequest{
+		Role:      "research_strategy_lead",
+		InputData: inputData,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("research strategy lead failed: %w", err)
+	}
+	results["research_strategy_lead"] = rslResp
+
+	// 2. Master Curator (with RSL output as context)
+	curatorContext := fmt.Sprintf("### RESEARCH & STRATEGY REPORT:\n\n%s", rslResp.Content)
 	curatorResp, err := c.Analyze(ctx, AnalysisRequest{
 		Role:      "master_curator",
 		InputData: inputData,
+		Context:   curatorContext,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("master curator failed: %w", err)
 	}
 	results["master_curator"] = curatorResp
 
-	// 2. Red Team (with curator output as context)
-	redTeamContext := fmt.Sprintf("### ВЫВОДЫ MASTER CURATOR:\n\n%s", curatorResp.Content)
+	// 3. Red Team (with RSL + Curator outputs as context)
+	redTeamContext := fmt.Sprintf(
+		"### RESEARCH & STRATEGY REPORT:\n\n%s\n\n---\n\n### ВЫВОДЫ MASTER CURATOR:\n\n%s",
+		rslResp.Content,
+		curatorResp.Content,
+	)
 	redTeamResp, err := c.Analyze(ctx, AnalysisRequest{
 		Role:      "red_team",
 		InputData: inputData,
@@ -121,9 +139,10 @@ func (c *ClaudeClient) RunFullCycle(ctx context.Context, inputData string) (map[
 	}
 	results["red_team"] = redTeamResp
 
-	// 3. Meta-Supervisor (with both outputs as context)
+	// 4. Meta-Supervisor (with all outputs as context)
 	metaContext := fmt.Sprintf(
-		"### ВЫВОДЫ MASTER CURATOR:\n\n%s\n\n---\n\n### ВЫВОДЫ RED TEAM:\n\n%s",
+		"### RESEARCH & STRATEGY REPORT:\n\n%s\n\n---\n\n### ВЫВОДЫ MASTER CURATOR:\n\n%s\n\n---\n\n### ВЫВОДЫ RED TEAM:\n\n%s",
+		rslResp.Content,
 		curatorResp.Content,
 		redTeamResp.Content,
 	)

@@ -71,6 +71,7 @@ export interface Cycle {
   cycle_type: 'full' | 'partial' | 'control' | null
   verdict: 'go' | 'wait' | 'stop' | null
   input_data: Record<string, unknown>
+  rsl_output: string | null
   master_curator_output: string | null
   red_team_output: string | null
   meta_supervisor_output: string | null

@@ -64,7 +64,7 @@ func (h *AIHandler) Analyze(w http.ResponseWriter, r *http.Request) {
 	results := make(map[string]*ai.AnalysisResponse)
 
 	if req.Role == "full" || req.Role == "" {
-		// Run full cycle (all 3 roles)
+		// Run full cycle (all 4 roles: RSL → Curator → Red Team → Meta-Supervisor)
 		fullResults, err := h.claude.RunFullCycle(ctx, inputData)
 		if err != nil {
 			respondError(w, http.StatusInternalServerError, "AI analysis failed: "+err.Error())
@@ -114,6 +114,12 @@ func (h *AIHandler) GetAnalysis(w http.ResponseWriter, r *http.Request) {
 
 	results := make(map[string]*ai.AnalysisResponse)
 
+	if cycle.RSLOutput != nil {
+		results["research_strategy_lead"] = &ai.AnalysisResponse{
+			Role:    "research_strategy_lead",
+			Content: *cycle.RSLOutput,
+		}
+	}
 	if cycle.MasterCuratorOutput != nil {
 		results["master_curator"] = &ai.AnalysisResponse{
 			Role:    "master_curator",
@@ -447,8 +453,11 @@ func extractTextFromPDF(data []byte) string {
 }
 
 func (h *AIHandler) saveAnalysisResults(cycleID int, results map[string]*ai.AnalysisResponse) error {
-	var masterOutput, redTeamOutput, metaOutput *string
+	var rslOutput, masterOutput, redTeamOutput, metaOutput *string
 
+	if r, ok := results["research_strategy_lead"]; ok {
+		rslOutput = &r.Content
+	}
 	if r, ok := results["master_curator"]; ok {
 		masterOutput = &r.Content
 	}
@@ -461,12 +470,13 @@ func (h *AIHandler) saveAnalysisResults(cycleID int, results map[string]*ai.Anal
 
 	_, err := h.db.DB.Exec(`
 		UPDATE cycles SET
-			master_curator_output = $1,
-			red_team_output = $2,
-			meta_supervisor_output = $3,
+			rsl_output = $1,
+			master_curator_output = $2,
+			red_team_output = $3,
+			meta_supervisor_output = $4,
 			updated_at = NOW()
-		WHERE id = $4
-	`, masterOutput, redTeamOutput, metaOutput, cycleID)
+		WHERE id = $5
+	`, rslOutput, masterOutput, redTeamOutput, metaOutput, cycleID)
 
 	return err
 }

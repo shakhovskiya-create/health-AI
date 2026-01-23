@@ -12,6 +12,7 @@ type Cycle struct {
 	CycleType            *string          `db:"cycle_type" json:"cycle_type"`
 	Verdict              *string          `db:"verdict" json:"verdict"`
 	InputData            *json.RawMessage `db:"input_data" json:"input_data"`
+	RSLOutput            *string          `db:"rsl_output" json:"rsl_output"`
 	MasterCuratorOutput  *string          `db:"master_curator_output" json:"master_curator_output"`
 	RedTeamOutput        *string          `db:"red_team_output" json:"red_team_output"`
 	MetaSupervisorOutput *string          `db:"meta_supervisor_output" json:"meta_supervisor_output"`
@@ -31,6 +32,7 @@ type CycleCreate struct {
 
 type CycleUpdate struct {
 	Verdict              *string         `json:"verdict"`
+	RSLOutput            *string         `json:"rsl_output"`
 	MasterCuratorOutput  *string         `json:"master_curator_output"`
 	RedTeamOutput        *string         `json:"red_team_output"`
 	MetaSupervisorOutput *string         `json:"meta_supervisor_output"`
