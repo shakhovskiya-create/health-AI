@@ -21,8 +21,8 @@ func NewCycleHandler(db *database.DB) *CycleHandler {
 }
 
 func (h *CycleHandler) List(w http.ResponseWriter, r *http.Request) {
-	var cycles []models.Cycle
-	err := h.db.DB.Select(&cycles, `
+	cycles := []models.Cycle{}
+	err := h.db.Select(&cycles, `
 		SELECT * FROM cycles
 		ORDER BY cycle_date DESC
 		LIMIT 50

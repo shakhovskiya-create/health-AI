@@ -181,7 +181,7 @@ func (h *ReminderHandler) GetToday(w http.ResponseWriter, r *http.Request) {
 
 	// Get current day of week (1=Monday, 7=Sunday)
 	// PostgreSQL uses 0=Sunday, but we'll use 1-7 in our JSON
-	var reminders []models.Reminder
+	reminders := []models.Reminder{}
 	err := h.db.Select(&reminders, `
 		SELECT * FROM reminders
 		WHERE user_id = $1
