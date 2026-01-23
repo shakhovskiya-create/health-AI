@@ -55,6 +55,7 @@ func main() {
 	goalHandler := handlers.NewGoalHandler(db)
 	labHandler := handlers.NewLabHandler(db)
 	interactionHandler := handlers.NewInteractionHandler(db)
+	cycleHandler := handlers.NewCycleHandler(db)
 	aiHandler := handlers.NewAIHandler(db, claudeClient)
 	reminderHandler := handlers.NewReminderHandler(db)
 
@@ -114,6 +115,16 @@ func main() {
 			r.Get("/{id}", interactionHandler.Get)
 			r.Put("/{id}", interactionHandler.Update)
 			r.Delete("/{id}", interactionHandler.Delete)
+		})
+
+		// Cycles
+		r.Route("/cycles", func(r chi.Router) {
+			r.Get("/", cycleHandler.List)
+			r.Post("/", cycleHandler.Create)
+			r.Get("/latest", cycleHandler.GetLatest)
+			r.Get("/{id}", cycleHandler.Get)
+			r.Put("/{id}", cycleHandler.Update)
+			r.Delete("/{id}", cycleHandler.Delete)
 		})
 
 		// AI
