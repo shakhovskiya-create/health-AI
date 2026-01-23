@@ -95,6 +95,15 @@ func (h *CycleHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Handle JSON fields - use nil for COALESCE to keep existing value
+	var decisions, requiredLabs interface{}
+	if input.Decisions != nil && len(input.Decisions) > 0 {
+		decisions = input.Decisions
+	}
+	if input.RequiredLabs != nil && len(input.RequiredLabs) > 0 {
+		requiredLabs = input.RequiredLabs
+	}
+
 	var cycle models.Cycle
 	err = h.db.DB.QueryRowx(`
 		UPDATE cycles SET
@@ -109,7 +118,7 @@ func (h *CycleHandler) Update(w http.ResponseWriter, r *http.Request) {
 		WHERE id = $8
 		RETURNING *
 	`, input.Verdict, input.MasterCuratorOutput, input.RedTeamOutput,
-		input.MetaSupervisorOutput, input.Decisions, input.RequiredLabs,
+		input.MetaSupervisorOutput, decisions, requiredLabs,
 		input.NextReviewDate, id).StructScan(&cycle)
 
 	if err != nil {
