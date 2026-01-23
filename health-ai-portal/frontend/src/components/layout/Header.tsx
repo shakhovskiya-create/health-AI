@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { remindersApi } from '@/api/client'
 
 export default function Header() {
-  const [isDark, setIsDark] = useState(true)
+  const [isDark, setIsDark] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
 
   const { data: reminders } = useQuery({
@@ -16,8 +16,8 @@ export default function Header() {
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme')
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    const shouldBeDark = savedTheme === 'dark' || (!savedTheme && prefersDark)
+    // Default to light theme, only use dark if explicitly saved or user prefers
+    const shouldBeDark = savedTheme === 'dark'
     setIsDark(shouldBeDark)
     document.documentElement.classList.toggle('dark', shouldBeDark)
   }, [])

@@ -263,6 +263,187 @@ func (h *AIHandler) ParseLabText(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// ParsePDF handles PDF file upload and parsing
+func (h *AIHandler) ParsePDF(w http.ResponseWriter, r *http.Request) {
+	// Limit upload size to 10MB
+	r.ParseMultipartForm(10 << 20)
+
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		respondError(w, http.StatusBadRequest, "Failed to read file: "+err.Error())
+		return
+	}
+	defer file.Close()
+
+	labName := r.FormValue("lab_name")
+	testDate := r.FormValue("test_date")
+
+	// Read file content
+	fileBytes := make([]byte, header.Size)
+	_, err = file.Read(fileBytes)
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "Failed to read file content")
+		return
+	}
+
+	// Extract text from PDF using simple text extraction
+	// For PDFs, we'll try to extract embedded text
+	text := extractTextFromPDF(fileBytes)
+
+	if text == "" {
+		respondError(w, http.StatusBadRequest, "Could not extract text from PDF. Try text input instead.")
+		return
+	}
+
+	ctx := r.Context()
+
+	// Use Claude to parse the extracted text
+	prompt := `Ты парсер лабораторных анализов. Извлеки все показатели из текста ниже.
+
+Верни ТОЛЬКО JSON массив без дополнительного текста. Формат каждого элемента:
+{
+  "marker_name": "название показателя (на английском, стандартное)",
+  "value": числовое_значение или null,
+  "unit": "единицы измерения",
+  "reference_min": минимум_нормы или null,
+  "reference_max": максимум_нормы или null,
+  "category": "категория"
+}
+
+Категории: hormones, thyroid, lipids, liver, kidney, blood, inflammation, vitamins, minerals, metabolism, other
+
+Стандартные названия маркеров (используй их):
+- Testosterone Total, Testosterone Free, Estradiol, Prolactin, LH, FSH, SHBG, DHEA-S
+- TSH, fT3, fT4
+- Cortisol, ACTH, Insulin, Glucose, HbA1c
+- Cholesterol Total, LDL, HDL, Triglycerides
+- ALT, AST, GGT, Bilirubin Total
+- Creatinine, Urea, Uric Acid
+- Ferritin, Iron, Vitamin D, Vitamin B12, Folate
+- Hemoglobin, Hematocrit, RBC, WBC, Platelets, ESR
+- CRP, Homocysteine, IGF-1
+
+ТЕКСТ ДЛЯ ПАРСИНГА:
+` + text
+
+	result, err := h.claude.Analyze(ctx, ai.AnalysisRequest{
+		Role:      "lab_parser",
+		InputData: prompt,
+	})
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "AI parsing failed: "+err.Error())
+		return
+	}
+
+	// Parse Claude's response
+	var markers []ParsedMarker
+	content := result.Content
+
+	// Try to extract JSON from response
+	start := -1
+	end := -1
+	bracketCount := 0
+	for i, c := range content {
+		if c == '[' {
+			if start == -1 {
+				start = i
+			}
+			bracketCount++
+		} else if c == ']' {
+			bracketCount--
+			if bracketCount == 0 && start != -1 {
+				end = i + 1
+				break
+			}
+		}
+	}
+
+	if start != -1 && end != -1 {
+		jsonStr := content[start:end]
+		if err := json.Unmarshal([]byte(jsonStr), &markers); err != nil {
+			respondJSON(w, http.StatusOK, ParseLabResponse{
+				LabName:  labName,
+				TestDate: testDate,
+				Markers:  []ParsedMarker{},
+				RawText:  content,
+			})
+			return
+		}
+	}
+
+	respondJSON(w, http.StatusOK, ParseLabResponse{
+		LabName:  labName,
+		TestDate: testDate,
+		Markers:  markers,
+	})
+}
+
+// extractTextFromPDF extracts text content from PDF bytes
+func extractTextFromPDF(data []byte) string {
+	// Simple PDF text extraction - looks for text between BT and ET markers
+	// and extracts strings in parentheses
+	content := string(data)
+	var result []byte
+
+	// Look for text streams and extract readable text
+	inText := false
+	inString := false
+	escape := false
+
+	for i := 0; i < len(content); i++ {
+		c := content[i]
+
+		// Check for BT (begin text) and ET (end text)
+		if i+1 < len(content) {
+			if content[i:i+2] == "BT" {
+				inText = true
+				continue
+			}
+			if content[i:i+2] == "ET" {
+				inText = false
+				result = append(result, ' ')
+				continue
+			}
+		}
+
+		if inText {
+			if c == '(' && !escape {
+				inString = true
+				continue
+			}
+			if c == ')' && !escape {
+				inString = false
+				result = append(result, ' ')
+				continue
+			}
+			if c == '\\' && !escape {
+				escape = true
+				continue
+			}
+			if inString {
+				// Handle common escape sequences
+				if escape {
+					switch c {
+					case 'n':
+						result = append(result, '\n')
+					case 'r':
+						result = append(result, '\r')
+					case 't':
+						result = append(result, '\t')
+					default:
+						result = append(result, c)
+					}
+					escape = false
+				} else if c >= 32 && c < 127 {
+					result = append(result, c)
+				}
+			}
+		}
+	}
+
+	return string(result)
+}
+
 func (h *AIHandler) saveAnalysisResults(cycleID int, results map[string]*ai.AnalysisResponse) error {
 	var masterOutput, redTeamOutput, metaOutput *string
 
